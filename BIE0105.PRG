@@ -1,0 +1,105 @@
+STORE .T. TO WCARGANDO
+DO WHILE WCARGANDO
+   @ WLIN05+0,WCOL05+0 CLEAR to WLIN05+4,WCOL05+55
+   @ WLIN05+0,WCOL05+0       to WLIN05+4,WCOL05+55 DOUBLE
+   @ WLIN05+0,WCOL05+5 SAY " TIPOS DE EGRESOS "
+   @ WLIN05+1,WCOL05+1  SAY "GRUPO       :"
+   @ WLIN05+2,WCOL05+1  SAY "SUBGRUPO    :"
+   STORE "INGRESE EL CODIGO SOLICITADO ( *ELIMINA*=ELIMINAR CODIGO, <ESC>=SALIR)" TO MES
+   DO MENSAJE WITH MES
+   @ WLIN05+1,WCOL05+15  GET WEGRGRU
+   READ
+   IF WEGRGRU=SPACE(3) .OR. WEGRGRU="000" .OR.READKEY()=12.OR.READKEY()=268
+      EXIT
+   ENDIF
+   STORE WEGRGRU+"000000" TO WCLAVE
+   SELECT 5
+   FIND &WCLAVE
+   IF EOF()
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE GRUPO     WITH WEGRGRU
+      REPLACE SUBGRUPO  WITH "000000"
+      FLUSH
+      @ WLIN05+1,WCOL05+25 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+   ELSE
+      do recloc
+      @ WLIN05+1,WCOL05+25 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+      IF DESCRI = "*ELIMINA*"
+         STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+         STORE "NS" TO WCH
+         DO PREGUNTA
+         IF WCH = "N"
+            LOOP
+         ELSE
+            SELECT 5
+            DO FILLOC
+            DELETE
+            UNLOCK
+            LOOP
+         ENDIF
+      ENDIF
+      FLUSH
+   ENDIF
+   @ WLIN05+2,WCOL05+15 GET WEGRSUB
+   READ
+   IF WEGRSUB=SPACE(6) .OR. WEGRSUB="000000" .OR.READKEY()=12.OR.READKEY()=268
+      LOOP
+   ENDIF
+   STORE WEGRGRU+WEGRSUB TO WCLAVE
+   SELECT 5
+   FIND &WCLAVE
+   IF EOF()
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE GRUPO    WITH WEGRGRU
+      REPLACE SUBGRUPO WITH WEGRSUB
+      FLUSH
+      @ WLIN05+2,WCOL05+25 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+   ELSE
+      do recloc
+      @ WLIN05+2,WCOL05+25 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+      IF DESCRI = "*ELIMINA*"
+         STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+         STORE "NS" TO WCH
+         DO PREGUNTA
+         IF WCH = "N"
+            LOOP
+         ELSE
+            SELECT 5
+            DO FILLOC
+            DELETE
+            UNLOCK
+            LOOP
+         ENDIF
+      ENDIF
+      FLUSH
+   ENDIF
+ENDDO
+RETURN
+
+

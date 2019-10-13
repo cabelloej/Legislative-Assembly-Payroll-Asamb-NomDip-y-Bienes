@@ -1,0 +1,217 @@
+
+SAVE SCRE TO WSCRE99
+store .t. to viendo
+do while viendo
+   STORE .F. TO WFLAGEXIT
+   RESTORE SCRE FROM WSCRE99
+   STORE SPACE(3)      TO XTIPGRU
+   STORE SPACE(3)      TO XTIPSUB
+   STORE SPACE(3)      TO XTIPREN
+   STORE 0             TO WTOTAL
+   STORE 100           TO WLINEA
+   STORE 0             TO WPAGINA
+
+   @ 04,0 clear to 09,60
+   @ 04,0 to 09,60
+   @ 04,02 SAY "BIENES POR TIPO"
+   @ 05,01 say "GR.DEL TIPO :"
+   @ 06,01 say "SG.DEL TIPO :"
+   @ 07,01 say "RG.DEL TIPO :"
+   @ 08,01 say "SALIDA (M/I):"
+
+   @ 05,14 GET XTIPGRU
+   READ
+   IF READKEY()=12 .OR. READKEY()=268
+      SELECT 7
+      SET ORDER TO 1
+      EXIT
+   ENDIF
+   IF XTIPGRU <> SPACE(3)
+      STORE XTIPGRU+"000000" TO XCLAVEGRU
+      SELECT 1
+      FIND &XCLAVEGRU
+      IF EOF()
+         STORE "NO REG. COMO GR.DEL TIPO" TO XTIPGRUDES
+      ELSE
+         STORE DESCRI                     TO XTIPGRUDES
+      ENDIF
+      @ 05,30 SAY XTIPGRUDES
+      @ 06,14 GET XTIPSUB
+      READ
+      IF READKEY()=12 .OR. READKEY()=268
+         LOOP
+      ENDIF
+      IF XTIPSUB <> SPACE(3)
+         STORE XTIPGRU+XTIPSUB+"000"  TO XCLAVESUB
+         SELECT 1
+         FIND &XCLAVESUB
+         IF EOF()
+            STORE "NO REG. COMO SG.DEL TIPO" TO XTIPSUBDES
+         ELSE
+            STORE DESCRI                     TO XTIPSUBDES
+         ENDIF
+         @ 06,30 SAY XTIPSUBDES
+         @ 07,14 GET XTIPREN
+         READ
+         IF READKEY()=12 .OR. READKEY()=268
+            LOOP
+         ENDIF
+         IF XTIPREN <> SPACE(3)
+            STORE XTIPGRU+XTIPSUB+XTIPREN TO XCLAVEREN
+            SELECT 1
+            FIND &XCLAVEREN
+            IF EOF()
+               STORE "NO REG. COMO RG.DEL TIPO" TO XTIPRENDES
+            ELSE
+               STORE DESCRI                     TO XTIPRENDES
+            ENDIF
+         ELSE
+            STORE "TODOS LOS RENGLONES"         TO XTIPRENDES
+         ENDIF
+         @ 07,30 SAY XTIPRENDES
+      ELSE
+         STORE "TODOS LOS SUBGRUPOS" TO XTIPSUBDES
+         STORE "TODOS LOS RENGLONES" TO XTIPRENDES
+         @ 06,30 SAY XTIPSUBDES
+         @ 07,30 SAY XTIPRENDES
+      ENDIF
+   ELSE
+      STORE "TODOS LOS GRUPOS"    TO XTIPGRUDES
+      STORE "TODOS LOS SUBGRUPOS" TO XTIPSUBDES
+      STORE "TODOS LOS RENGLONES" TO XTIPRENDES
+      @ 05,30 SAY XTIPGRUDES
+      @ 06,30 SAY XTIPSUBDES
+      @ 07,30 SAY XTIPRENDES
+   ENDIF
+
+   STORE "SELECCIONE LA SALIDA: (M)ONITOR, (I)MPRESORA" TO TEX
+   STORE "MI" TO WCH
+   DO PREGUNTA
+   IF READKEY()=12 .OR. READKEY()=268
+      LOOP
+   ENDIF
+   STORE WCH TO WSALIDA
+   STORE 0   TO WPAGINA
+   STORE 100 TO WLINEA
+   IF WSALIDA = "I"
+      STORE 55 TO WSALTO
+      STORE "IMPRESORA" TO WSALIDES
+   ELSE
+      STORE 22 TO WSALTO
+      STORE "MONITOR" TO WSALIDES
+   ENDIF
+   @ 08,14 SAY WSALIDA
+   @ 08,30 SAY WSALIDES
+
+   STORE "OPCIONES: (C)ONTINUAR, (S)ALIR" TO TEX
+   STORE "CS" TO WCH
+   DO PREGUNTA
+   IF WCH = "S"
+      exit
+   ENDIF
+   IF WSALIDA = "I"
+      SET DEVI TO PRINT
+   ELSE
+      SET DEVI TO SCRE
+   ENDIF
+
+   SELECT 7
+   SET ORDER TO 2
+   GO TOP
+   DO WHILE .NOT. EOF()
+      *** FILTROS
+      IF EGRGRU<>SPACE(3) .OR. EGRTIPREF<>SPACE(3) .OR. EGRFECHA<>CTOD("  -  -  ")
+         SELECT 7
+         SKIP
+         LOOP
+      ENDIF
+      IF XTIPGRU <> SPACE(3) .AND. XTIPGRU <> TIPGRU
+         SELECT 7
+         SKIP
+         LOOP
+      ENDIF
+      IF XTIPSUB <> SPACE(3) .AND. XTIPSUB <> TIPSUB
+         SELECT 7
+         SKIP
+         LOOP
+      ENDIF
+      IF XTIPREN <> SPACE(3) .AND. XTIPREN <> TIPREN
+         SELECT 7
+         SKIP
+         LOOP
+      ENDIF
+      *** FIN FILTROS
+
+      STORE WLINEA+1 TO WLINEA
+      IF WLINEA >=WSALTO
+         DO HD0304
+         IF WFLAGEXIT
+            EXIT
+         ENDIF
+      ENDIF
+      SELECT 7
+      @ WLINEA ,01  SAY TIPGRU
+      @ WLINEA ,05  SAY TIPSUB
+      @ WLINEA ,09  SAY TIPREN
+      @ WLINEA ,13  SAY CODIGO
+      @ WLINEA ,26  SAY DESCRI1
+      @ WLINEA ,67  SAY VALOR PICTURE "######,###.##"
+      STORE WTOTAL + VALOR TO WTOTAL
+      IF DESCRI2 <> SPACE(40)
+         STORE WLINEA+1 TO WLINEA
+         IF WLINEA >=WSALTO
+            DO HD0304
+            IF WFLAGEXIT
+               EXIT
+            ENDIF
+         ENDIF
+         @ WLINEA,26 SAY DESCRI2
+      ENDIF
+      IF DESCRI3 <> SPACE(40)
+         STORE WLINEA+1 TO WLINEA
+         IF WLINEA >=WSALTO
+            DO HD0304
+            IF WFLAGEXIT
+               EXIT
+            ENDIF
+         ENDIF
+         @ WLINEA,26 SAY DESCRI3
+      ENDIF
+      IF DESCRI4 <> SPACE(40)
+         STORE WLINEA+1 TO WLINEA
+         IF WLINEA >=WSALTO
+            DO HD0304
+            IF WFLAGEXIT
+               EXIT
+            ENDIF
+         ENDIF
+         @ WLINEA,26 SAY DESCRI4
+      ENDIF
+      STORE WLINEA+1 TO WLINEA
+      @ WLINEA,00 SAY REPLICATE("-",80)
+      SELECT 7
+      SKIP
+   ENDDO
+   STORE WLINEA + 1 TO WLINEA
+   IF WLINEA >=WSALTO
+      DO HD0304
+      IF WFLAGEXIT
+         EXIT
+      ENDIF
+   ENDIF
+   @ WLINEA ,38  SAY "TOTAL VALOR REPORTADO:"
+   @ WLINEA ,65  SAY WTOTAL PICTURE "####,###,###.##"
+   IF WSALIDA = "M"
+      STORE "OPRIMA <ENTER> PARA FINALIZAR" TO MES
+      DO AVISO WITH MES
+   ELSE
+      EJECT
+      SET DEVI TO SCRE
+   ENDIF
+ENDDO
+return
+
+
+
+
+

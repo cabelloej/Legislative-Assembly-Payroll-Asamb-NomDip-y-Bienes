@@ -1,0 +1,38 @@
+SAVE SCRE TO SCRE4
+store .t. to wsub4
+do while wsub4
+   RESTORE SCREEN FROM SCRE4
+   @ 04,37 clear to 10,60
+   @ 04,37 to 10,60
+   @ 05,38 PROMPT "ORDINARIA             "
+   @ 06,38 PROMPT "PRESUPUESTARIA        "
+   @ 07,38 PROMPT "CONCEPTUAL            "
+   @ 08,38 PROMPT "VERTICAL              "
+   @ 08,38 PROMPT "HORIZONTAL            "
+   MENU TO WSUBSUB4
+   DO CASE
+   CASE WSUBSUB4 = 1
+        HIDE MENU MENUAP
+        DO AP0316A
+        SHOW MENU MENUAP
+   CASE WSUBSUB4 = 2
+        HIDE MENU MENUAP
+        DO AP0316B
+        SHOW MENU MENUAP
+   CASE WSUBSUB4 = 3
+        HIDE MENU MENUAP
+        DO AP0316C
+        SHOW MENU MENUAP
+   CASE WSUBSUB4 = 4
+        HIDE MENU MENUAP
+        DO AP0316D
+        SHOW MENU MENUAP
+   CASE WSUBSUB4 = 5
+        HIDE MENU MENUAP
+        DO AP0316E
+        SHOW MENU MENUAP
+   CASE WSUBSUB4 = 0
+        EXIT
+   ENDCASE
+enddo
+
